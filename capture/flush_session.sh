@@ -5,8 +5,12 @@
 # it stays usable mid-capture instead of only at teardown:
 #
 #   can.asc      — track the last converted byte offset in can.log, feed only
-#                  the new bytes to log2asc and append. Cost stays constant
-#                  regardless of file size.
+#                  the new bytes to log2asc and append, rebasing each chunk's
+#                  timestamps onto the session's first frame first: log2asc
+#                  normalizes every input file to start at 0, so appending
+#                  raw chunk output would restart the timeline on every flush
+#                  and make jitter/gap analysis report bogus values. Cost
+#                  stays constant regardless of file size.
 #   usbcan.pcap* — each ring file is bounded and gets truncated by tcpdump
 #                  on wraparound, so there is no meaningful "since session
 #                  start" delta to accumulate. Whenever a ring file's mtime
@@ -28,6 +32,7 @@ can_asc=$session/can.asc
 chunk=$session/.flush-chunk.log
 chunk_asc=$session/.flush-chunk.asc
 offset=0
+session_t0=
 
 log() { echo "robopi-session-flush: $*" >&2; }
 
@@ -47,13 +52,27 @@ while :; do
                 head -n -1 "$chunk" > "$chunk.part" && mv "$chunk.part" "$chunk"
             fi
             if [ -s "$chunk" ]; then
-                if log2asc -I "$chunk" -O "$chunk_asc" can0 can1 can2 can3 >/dev/null 2>&1; then
-                    if [ "$offset" -eq 0 ]; then
-                        cat "$chunk_asc" >> "$can_asc"
-                    else
-                        tail -n +4 "$chunk_asc" >> "$can_asc"
+                # Rebase this chunk onto the session's first frame: can.log
+                # timestamps are absolute, but log2asc restarts each input
+                # file's timeline at 0, so add (chunk_start - session_start)
+                # to every data line before appending.
+                chunk_t0=$(sed -n '1s/^(\([0-9][0-9.]*\)).*/\1/p' "$chunk")
+                if [ -n "$chunk_t0" ]; then
+                    if [ -z "$session_t0" ]; then
+                        session_t0=$chunk_t0
                     fi
-                    offset=$((offset + $(wc -c < "$chunk")))
+                    shift_secs=$(awk -v c="$chunk_t0" -v z="$session_t0" \
+                        'BEGIN { printf "%.6f", c - z }')
+                    if log2asc -I "$chunk" -O "$chunk_asc" can0 can1 can2 can3 >/dev/null 2>&1; then
+                        awk -v s="$shift_secs" '
+                            match($0, /^[ \t]*[0-9]+\.[0-9]+/) {
+                                printf "%13.6f%s\n", substr($0, RSTART, RLENGTH) + s, substr($0, RLENGTH + 1)
+                                next
+                            }
+                            { print }' "$chunk_asc" | \
+                            { if [ "$offset" -eq 0 ]; then cat; else tail -n +4; fi; } >> "$can_asc"
+                        offset=$((offset + $(wc -c < "$chunk")))
+                    fi
                 fi
             fi
             rm -f "$chunk" "$chunk_asc"

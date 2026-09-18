@@ -9,7 +9,8 @@ Rules-Requires-Root: no
 Package: robopi-analyze
 Architecture: all
 Depends: ${misc:Depends}, can-utils, tcpdump, usbutils, kmod, python3,
-         python3-serial, python3-usb, python3-crcmod, python3-hid, zip
+         python3-serial, python3-usb, python3-crcmod, python3-hid, zip,
+         python3-can
 Description: RoboPi HPM and communication diagnostics
  Provides synchronized seven-dimensional logging, USB-CAN capture and
  analysis tools, HPM UART/flash tools, firmware and diagnostic dashboards.

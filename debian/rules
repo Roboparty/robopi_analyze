@@ -24,6 +24,8 @@ override_dh_auto_install:
 		$(CURDIR)/debian/robopi-analyze/opt/roboparty/lib/robopi-analyze/analysis/
 	install -D -m 0755 analysis/analyze_seven_dimensions.py \
 		$(CURDIR)/debian/robopi-analyze/opt/roboparty/bin/robopi-seven-analyze
+	install -D -m 0755 analysis/analyze_can_asc.py \
+		$(CURDIR)/debian/robopi-analyze/opt/roboparty/bin/analyze-can-asc
 	install -D -m 0755 dimensions/06_can_asc.sh \
 		$(CURDIR)/debian/robopi-analyze/opt/roboparty/bin/robopi-can-capture
 	install -D -m 0755 bin/export_seven_dimensions.sh \
@@ -55,6 +57,7 @@ override_dh_auto_install:
 	install -d $(CURDIR)/debian/robopi-analyze/usr/bin
 	ln -sf /opt/roboparty/bin/robopi-seven-capture $(CURDIR)/debian/robopi-analyze/usr/bin/robopi-seven-capture
 	ln -sf /opt/roboparty/bin/robopi-seven-analyze $(CURDIR)/debian/robopi-analyze/usr/bin/robopi-seven-analyze
+	ln -sf /opt/roboparty/bin/analyze-can-asc $(CURDIR)/debian/robopi-analyze/usr/bin/analyze-can-asc
 	ln -sf /opt/roboparty/bin/robopi-seven-export $(CURDIR)/debian/robopi-analyze/usr/bin/robopi-seven-export
 	ln -sf /opt/roboparty/bin/robopi-session-cleanup $(CURDIR)/debian/robopi-analyze/usr/bin/robopi-session-cleanup
 	ln -sf /opt/roboparty/bin/robopi-comm-status $(CURDIR)/debian/robopi-analyze/usr/bin/robopi-comm-status

@@ -15,7 +15,10 @@ ExecStart=/opt/roboparty/bin/robopi-seven-capture
 Restart=on-failure
 RestartSec=5
 KillSignal=SIGINT
-TimeoutStopSec=30
+# Teardown runs a full log2asc conversion over the whole can.log; on a long
+# high-traffic session that alone can exceed 30s, and being killed mid-way
+# leaves manifest.json without ended_at_unix.
+TimeoutStopSec=300
 Nice=15
 IOSchedulingClass=idle
 CPUSchedulingPolicy=batch

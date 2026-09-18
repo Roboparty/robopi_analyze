@@ -1,3 +1,37 @@
+robopi-analyze (1.0.9-1) stable; urgency=medium
+
+  * Ship analyze-can-asc (ASC periodicity/jitter/gap analysis) as a packaged
+    command depending on python3-can; it previously lived only as an unpackaged
+    copy in /usr/local/bin. It now also accepts a session directory instead
+    of the can.asc path.
+  * analyze-can-asc: compute jitter robustly — intervals beyond 2x the median
+    period are excluded from the stddev and counted separately, so a single
+    long stop no longer drowns the real sub-millisecond jitter (a 160 s stop
+    previously inflated the stddev to ~542 ms via a single sample).
+  * analyze-can-asc: attribute oversized gaps three ways instead of calling
+    them all "lost frames" — channel-wide silence of a second or more is a
+    bus-idle event (transmitter stopped), shorter channel-synchronized halts
+    are summarized as scheduler-beat stalls, and only gaps that occur while
+    other ids keep transmitting are flagged as suspected loss.
+  * analyze-can-asc: exclude event-like ids (average rate below 1 Hz, e.g.
+    Device_Cmd 0x7FF config bursts) from periodicity tables, and widen table
+    columns to the widest cell so large values no longer glue columns.
+
+ -- wentywenty <2321901849@qq.com>  Thu, 18 Sep 2026 00:00:00 +0800
+
+robopi-analyze (1.0.8-1) stable; urgency=medium
+
+  * Rebase each flushed can.asc chunk onto the session's first-frame
+    timestamp before appending: log2asc normalizes every input file to
+    start at 0, so the incrementally assembled can.asc restarted its
+    timeline on every flush interval, making mid-capture jitter and gap
+    analysis report bogus values (negative intervals, inflated stddev).
+  * Raise TimeoutStopSec from 30s to 300s: teardown's full log2asc
+    conversion on a long high-traffic session exceeded 30s and was killed
+    before manifest.json got its ended_at_unix.
+
+ -- wentywenty <2321901849@qq.com>  Thu, 18 Sep 2026 00:00:00 +0800
+
 robopi-analyze (1.0.7-1) stable; urgency=medium
 
   * Auto-rotate a running capture into a fresh session every
