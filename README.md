@@ -36,7 +36,7 @@ sudo systemctl stop usbcan-capture.service
 1. BMS/电源：周期记录 `bms.service` 状态。
 2. CAN 状态：记录四路 CAN 的状态、错误计数和收发统计。
 3. 内核日志：记录动态 `dmesg`，用于定位驱动和 USB 事件。
-4. HPM 串口：记录 `/dev/ttyS4` 的 HPM 固件日志，默认 115200 8N1。
+4. HPM 串口：记录 `/dev/ttyS4` 的 HPM 固件日志，默认 921600 8N1。
 5. USB-CAN：记录 `usbmon` 原始 USB URB PCAP。
 6. CAN ASC：采集 `can0` 到 `can3` 并转换为 Vector ASC 格式。
 7. 推理输出：记录 `inference_session` screen 会话文本。

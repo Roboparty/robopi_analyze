@@ -5,7 +5,7 @@
 set -eu
 
 device=${HPM_LOG_DEVICE:-/dev/ttyS4}
-baud=${HPM_LOG_BAUD:-115200}
+baud=${HPM_LOG_BAUD:-921600}
 
 case $baud in
     ''|*[!0-9]*) echo "hpm-log-capture: invalid baud rate: $baud" >&2; exit 1 ;;
